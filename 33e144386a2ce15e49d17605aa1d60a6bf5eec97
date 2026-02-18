@@ -1,0 +1,36 @@
+main.go
+  434a8a92811f4551 56,78-344
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "33e144386a2ce15e49d17605aa1d60a6bf5eec97",
+  "prompts": {
+    "434a8a92811f4551": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c6fbe-deb4-7601-8abb-c9de3c837222",
+        "model": "gpt-5.3-codex-spark"
+      },
+      "human_author": "matéo! <6matbub@gmail.com>",
+      "messages": [],
+      "total_additions": 270,
+      "total_deletions": 0,
+      "accepted_lines": 270,
+      "overriden_lines": 0
+    },
+    "b9b4ad014758b7d6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c6fab-fbc2-7b02-857d-5cb34f62ed16",
+        "model": "gpt-5.3-codex-spark"
+      },
+      "human_author": "matéo! <6matbub@gmail.com>",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 0,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
