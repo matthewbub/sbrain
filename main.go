@@ -53,6 +53,7 @@ func main() {
 
 	server := &server{db: db}
 	mux := http.NewServeMux()
+	mux.HandleFunc("/openapi", server.openAPISpecHandler)
 	mux.HandleFunc("/brain", server.brainCollectionHandler)
 	mux.HandleFunc("/brain/", server.brainItemHandler)
 	mux.HandleFunc("/logs", server.logCollectionHandler)
@@ -72,6 +73,275 @@ func main() {
 
 type server struct {
 	db *sql.DB
+}
+
+func (s *server) openAPISpecHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, openAPISpec())
+}
+
+func openAPISpec() map[string]any {
+	return map[string]any{
+		"openapi": "3.0.3",
+		"info": map[string]any{
+			"title":   "sbrain API",
+			"version": "1.0.0",
+		},
+		"paths": map[string]any{
+			"/openapi": map[string]any{
+				"get": map[string]any{
+					"summary": "Get OpenAPI schema for the service",
+					"responses": map[string]any{
+						"200": map[string]any{
+							"description": "OpenAPI document",
+							"content": map[string]any{
+								"application/json": map[string]any{
+									"schema": map[string]any{"type": "object"},
+								},
+							},
+						},
+					},
+				},
+			},
+			"/brain": map[string]any{
+				"get": map[string]any{
+					"summary": "List all brain records",
+					"operationId": "listBrains",
+					"responses": map[string]any{
+						"200": map[string]any{
+							"description": "List of brain records",
+							"content": map[string]any{
+								"application/json": map[string]any{
+									"schema": map[string]any{
+										"type": "array",
+										"items": map[string]any{"$ref": "#/components/schemas/Brain"},
+									},
+								},
+							},
+						},
+					},
+				},
+				"post": map[string]any{
+					"summary": "Create a brain record",
+					"operationId": "createBrain",
+					"requestBody": map[string]any{
+						"required": true,
+						"content": map[string]any{
+							"application/json": map[string]any{
+								"schema": map[string]any{"$ref": "#/components/schemas/BrainCreate"},
+							},
+						},
+					},
+					"responses": map[string]any{
+						"201": map[string]any{
+							"description": "Created brain record",
+							"content": map[string]any{
+								"application/json": map[string]any{
+									"schema": map[string]any{"$ref": "#/components/schemas/Brain"},
+								},
+							},
+						},
+						"400": map[string]any{"description": "Bad request"},
+						"500": map[string]any{"description": "Server error"},
+					},
+				},
+			},
+			"/brain/{id}": map[string]any{
+				"parameters": []map[string]any{
+					{
+						"name":     "id",
+						"in":       "path",
+						"required": true,
+						"schema": map[string]any{
+							"type":   "integer",
+							"format": "int64",
+						},
+					},
+				},
+				"get": map[string]any{
+					"summary": "Get a brain record by ID",
+					"operationId": "getBrainById",
+					"responses": map[string]any{
+						"200": map[string]any{
+							"description": "Brain record",
+							"content": map[string]any{
+								"application/json": map[string]any{
+									"schema": map[string]any{"$ref": "#/components/schemas/Brain"},
+								},
+							},
+						},
+						"400": map[string]any{"description": "Invalid ID"},
+						"404": map[string]any{"description": "Not found"},
+						"500": map[string]any{"description": "Server error"},
+					},
+				},
+			},
+			"/logs": map[string]any{
+				"get": map[string]any{
+					"summary": "List all logs",
+					"operationId": "listLogs",
+					"responses": map[string]any{
+						"200": map[string]any{
+							"description": "List of logs",
+							"content": map[string]any{
+								"application/json": map[string]any{
+									"schema": map[string]any{
+										"type": "array",
+										"items": map[string]any{"$ref": "#/components/schemas/LogEntry"},
+									},
+								},
+							},
+						},
+					},
+				},
+				"post": map[string]any{
+					"summary": "Create a log",
+					"operationId": "createLog",
+					"requestBody": map[string]any{
+						"required": true,
+						"content": map[string]any{
+							"application/json": map[string]any{
+								"schema": map[string]any{"$ref": "#/components/schemas/LogCreate"},
+							},
+						},
+					},
+					"responses": map[string]any{
+						"201": map[string]any{
+							"description": "Created log",
+							"content": map[string]any{
+								"application/json": map[string]any{
+									"schema": map[string]any{"$ref": "#/components/schemas/LogEntry"},
+								},
+							},
+						},
+						"400": map[string]any{"description": "Bad request"},
+						"500": map[string]any{"description": "Server error"},
+					},
+				},
+			},
+			"/logs/{id}": map[string]any{
+				"parameters": []map[string]any{
+					{
+						"name":     "id",
+						"in":       "path",
+						"required": true,
+						"schema": map[string]any{
+							"type":   "integer",
+							"format": "int64",
+						},
+					},
+				},
+				"get": map[string]any{
+					"summary": "Get a log by ID",
+					"operationId": "getLogById",
+					"responses": map[string]any{
+						"200": map[string]any{
+							"description": "Log entry",
+							"content": map[string]any{
+								"application/json": map[string]any{
+									"schema": map[string]any{"$ref": "#/components/schemas/LogEntry"},
+								},
+							},
+						},
+						"400": map[string]any{"description": "Invalid ID"},
+						"404": map[string]any{"description": "Not found"},
+						"500": map[string]any{"description": "Server error"},
+					},
+				},
+			},
+		},
+		"components": map[string]any{
+			"schemas": map[string]any{
+				"Brain": map[string]any{
+					"type": "object",
+					"required": []string{
+						"id",
+						"created_at",
+						"title",
+						"context",
+						"project",
+						"commits",
+						"tags",
+					},
+					"properties": map[string]any{
+						"id":        map[string]any{"type": "integer", "format": "int64"},
+						"created_at": map[string]any{"type": "string", "description": "timestamp"},
+						"title":     map[string]any{"type": "string"},
+						"context":   map[string]any{"type": "string"},
+						"project":   map[string]any{"type": "string"},
+						"commits":   map[string]any{"type": "string"},
+						"tags":      map[string]any{"type": "string"},
+					},
+				},
+				"BrainCreate": map[string]any{
+					"type": "object",
+					"required": []string{
+						"title",
+						"context",
+						"project",
+					},
+					"properties": map[string]any{
+						"title":   map[string]any{"type": "string"},
+						"context": map[string]any{"type": "string"},
+						"project": map[string]any{"type": "string"},
+						"commits": map[string]any{"type": "string"},
+						"tags":    map[string]any{"type": "string"},
+					},
+				},
+				"LogEntry": map[string]any{
+					"type": "object",
+					"required": []string{
+						"id",
+						"created_at",
+						"level",
+						"message",
+						"endpoint",
+						"method",
+						"ip",
+						"user_agent",
+						"request_id",
+						"metadata",
+					},
+					"properties": map[string]any{
+						"id":              map[string]any{"type": "integer", "format": "int64"},
+						"created_at":      map[string]any{"type": "string", "description": "timestamp"},
+						"level":           map[string]any{"type": "string"},
+						"message":         map[string]any{"type": "string"},
+						"endpoint":        map[string]any{"type": "string"},
+						"method":          map[string]any{"type": "string"},
+						"ip":              map[string]any{"type": "string"},
+						"user_agent":      map[string]any{"type": "string"},
+						"request_id":      map[string]any{"type": "string"},
+						"status_code":     map[string]any{"type": "integer", "format": "int32", "nullable": true},
+						"response_time_ms": map[string]any{"type": "integer", "format": "int32", "nullable": true},
+						"metadata":        map[string]any{"type": "string"},
+					},
+				},
+				"LogCreate": map[string]any{
+					"type": "object",
+					"required": []string{
+						"message",
+					},
+					"properties": map[string]any{
+						"level":           map[string]any{"type": "string", "default": "info"},
+						"message":         map[string]any{"type": "string"},
+						"endpoint":        map[string]any{"type": "string"},
+						"method":          map[string]any{"type": "string"},
+						"ip":              map[string]any{"type": "string"},
+						"user_agent":      map[string]any{"type": "string"},
+						"request_id":      map[string]any{"type": "string"},
+						"status_code":     map[string]any{"type": "integer", "format": "int32", "nullable": true},
+						"response_time_ms": map[string]any{"type": "integer", "format": "int32", "nullable": true},
+						"metadata":        map[string]any{"type": "string"},
+					},
+				},
+			},
+		},
+	}
 }
 
 func (s *server) notFoundHandler(w http.ResponseWriter, r *http.Request) {
