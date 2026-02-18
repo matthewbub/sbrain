@@ -47,3 +47,73 @@ Railway-friendly behavior:
 - Uses a startup migration step before serving
 
 If Railway provides a persistent volume, mount it at `/data` and keep `SBRAIN_DB=/data/sbrain.db`.
+
+## API examples with `curl`
+
+The application exposes a small HTTP API on port `8080` by default.
+
+Set a base URL for the running server:
+
+```bash
+BASE_URL="http://localhost:8080"
+```
+
+Health check:
+
+```bash
+curl -i "$BASE_URL/"
+```
+
+Brains collection:
+
+```bash
+# List all brains
+curl -sS "$BASE_URL/brain"
+
+# Create a brain
+curl -sS -X POST "$BASE_URL/brain" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Example title",
+    "context": "Important context",
+    "project": "sbrain",
+    "commits": "abc123",
+    "tags": "ops,notes"
+  }'
+```
+
+Single brain:
+
+```bash
+curl -sS "$BASE_URL/brain/1"
+```
+
+Logs collection:
+
+```bash
+# List all logs
+curl -sS "$BASE_URL/logs"
+
+# Create a log entry
+curl -sS -X POST "$BASE_URL/logs" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "level": "info",
+    "message": "Service started",
+    "endpoint": "/",
+    "method": "GET",
+    "ip": "127.0.0.1",
+    "request_id": "req-1"
+  }'
+```
+
+Single log:
+
+```bash
+curl -sS "$BASE_URL/logs/1"
+```
+
+Notes:
+
+- All mutating requests use `POST`.
+- Unhandled methods return `405 Method Not Allowed`.
