@@ -1,0 +1,23 @@
+README.md
+  b9b4ad014758b7d6 50-119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "1b76e4f3c35b1a9e80cecb2c4c1d120828dcf997",
+  "prompts": {
+    "b9b4ad014758b7d6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c6fab-fbc2-7b02-857d-5cb34f62ed16",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "matéo! <6matbub@gmail.com>",
+      "messages": [],
+      "total_additions": 70,
+      "total_deletions": 0,
+      "accepted_lines": 70,
+      "overriden_lines": 0
+    }
+  }
+}
