@@ -1,0 +1,29 @@
+docker-entrypoint.sh
+  ef00d2b9c3d913bf 1-20
+README.md
+  ef00d2b9c3d913bf 33-49
+.dockerignore
+  ef00d2b9c3d913bf 1-5
+Dockerfile
+  ef00d2b9c3d913bf 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "5e2b7929565c785134b039b2c1a73caa445b1971",
+  "prompts": {
+    "ef00d2b9c3d913bf": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c6f90-8352-7512-979f-3ff380d423b2",
+        "model": "gpt-5.3-codex-spark"
+      },
+      "human_author": "matéo! <6matbub@gmail.com>",
+      "messages": [],
+      "total_additions": 86,
+      "total_deletions": 0,
+      "accepted_lines": 86,
+      "overriden_lines": 0
+    }
+  }
+}
