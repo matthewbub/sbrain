@@ -1,0 +1,5 @@
+.git
+tmp
+*.tmp
+*.log
+*.db

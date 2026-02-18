@@ -30,3 +30,20 @@ $(go env GOPATH)/bin/migrate -path ./migrations -database "sqlite3://./sbrain.db
 ```
 
 Optional: put `$HOME/go/bin` before Homebrew in your `PATH` so `migrate` resolves to the SQLite-enabled binary.
+
+## Docker / Railway
+
+Build and run locally:
+
+```bash
+docker build -t sbrain .
+docker run -p 8080:8080 -v sbrain-data:/data -e PORT=8080 sbrain
+```
+
+Railway-friendly behavior:
+- Exposes port `8080`
+- Supports Railway’s `PORT` env var
+- Stores the SQLite DB at `/data/sbrain.db`
+- Uses a startup migration step before serving
+
+If Railway provides a persistent volume, mount it at `/data` and keep `SBRAIN_DB=/data/sbrain.db`.
