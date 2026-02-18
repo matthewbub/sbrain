@@ -39,6 +39,5 @@ USER app
 EXPOSE 8080
 ENV SBRAIN_DB=/data/sbrain.db
 ENV SBRAIN_ADDR=:8080
-VOLUME ["/data"]
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
