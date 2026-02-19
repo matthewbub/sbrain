@@ -1,0 +1,25 @@
+docker-entrypoint.sh
+  fe6209f3c0156fc8 19-43
+main.go
+  fe6209f3c0156fc8 11,49-71,78-85,107-119,121-123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "59333c77d57c046f13f372280702efe8432e5457",
+  "prompts": {
+    "fe6209f3c0156fc8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c73fd-6db1-77f3-b59b-6a15fbb4e870",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "matéo! <6matbub@gmail.com>",
+      "messages": [],
+      "total_additions": 77,
+      "total_deletions": 0,
+      "accepted_lines": 77,
+      "overriden_lines": 0
+    }
+  }
+}
