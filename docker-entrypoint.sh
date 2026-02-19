@@ -15,6 +15,7 @@ fi
 
 export SBRAIN_DB="${SBRAIN_DB:-/data/sbrain.db}"
 mkdir -p /data
+mkdir -p "$(dirname "$SBRAIN_DB")"
 
 is_production=0
 if [ -n "${RAILWAY_ENVIRONMENT:-}" ] || [ -n "${RAILWAY_PROJECT_ID:-}" ]; then
@@ -40,6 +41,10 @@ if [ -f "$SBRAIN_DB" ]; then
 else
   echo "WARNING: Database file missing at startup: $SBRAIN_DB (a new database may be created)"
 fi
+
+# Ensure sqlite file exists before running migrations; first boot on a fresh
+# volume can otherwise fail depending on sqlite open mode used by migrate.
+touch "$SBRAIN_DB"
 
 /usr/local/bin/migrate -path /app/migrations -database "sqlite3://$SBRAIN_DB" up
 exec /usr/local/bin/sbrain
