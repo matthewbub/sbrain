@@ -45,6 +45,10 @@ fi
 # Ensure sqlite file exists before running migrations; first boot on a fresh
 # volume can otherwise fail depending on sqlite open mode used by migrate.
 touch "$SBRAIN_DB"
+if [ ! -w "$SBRAIN_DB" ]; then
+  echo "Refusing to continue: SBRAIN_DB is not writable: $SBRAIN_DB. Ensure the mounted volume at /data allows writes." >&2
+  exit 1
+fi
 
 /usr/local/bin/migrate -path /app/migrations -database "sqlite3://$SBRAIN_DB" up
 exec /usr/local/bin/sbrain

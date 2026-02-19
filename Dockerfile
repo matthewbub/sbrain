@@ -29,12 +29,7 @@ COPY --from=builder /src/migrations ./migrations
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
-    && addgroup -S app \
-    && adduser -S app -G app \
-    && mkdir -p /data \
-    && chown -R app:app /data
-
-USER app
+    && mkdir -p /data
 
 EXPOSE 8080
 ENV SBRAIN_DB=/data/sbrain.db
