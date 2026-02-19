@@ -16,5 +16,30 @@ fi
 export SBRAIN_DB="${SBRAIN_DB:-/data/sbrain.db}"
 mkdir -p /data
 
+is_production=0
+if [ -n "${RAILWAY_ENVIRONMENT:-}" ] || [ -n "${RAILWAY_PROJECT_ID:-}" ]; then
+  is_production=1
+fi
+if [ "${APP_ENV:-}" = "production" ] || [ "${GO_ENV:-}" = "production" ] || [ "${ENV:-}" = "production" ]; then
+  is_production=1
+fi
+
+if [ "$is_production" -eq 1 ]; then
+  case "$SBRAIN_DB" in
+    /data/*) ;;
+    *)
+      echo "Refusing to start in production with SBRAIN_DB=$SBRAIN_DB. Use /data/... and mount a persistent volume at /data." >&2
+      exit 1
+      ;;
+  esac
+fi
+
+echo "Starting with SBRAIN_DB=$SBRAIN_DB"
+if [ -f "$SBRAIN_DB" ]; then
+  echo "Database file exists at startup: $SBRAIN_DB"
+else
+  echo "WARNING: Database file missing at startup: $SBRAIN_DB (a new database may be created)"
+fi
+
 /usr/local/bin/migrate -path /app/migrations -database "sqlite3://$SBRAIN_DB" up
 exec /usr/local/bin/sbrain

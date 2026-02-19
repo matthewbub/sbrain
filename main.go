@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -45,11 +46,43 @@ func main() {
 		dbPath = "sbrain.db"
 	}
 
+	absDBPath, err := filepath.Abs(dbPath)
+	if err != nil {
+		log.Printf("warning: could not resolve absolute DB path for %q: %v", dbPath, err)
+		absDBPath = dbPath
+	}
+
+	log.Printf("database path configured: %q (resolved: %q)", dbPath, absDBPath)
+	if err := enforcePersistentDBPath(absDBPath); err != nil {
+		log.Fatal(err)
+	}
+
+	dbWasMissing := false
+	info, err := os.Stat(absDBPath)
+	switch {
+	case err == nil:
+		log.Printf("database file exists at startup: %q (%d bytes)", absDBPath, info.Size())
+	case os.IsNotExist(err):
+		dbWasMissing = true
+		log.Printf("warning: database file does not exist at startup: %q (a new database may be created)", absDBPath)
+	default:
+		log.Printf("warning: unable to inspect database file %q: %v", absDBPath, err)
+	}
+
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatalf("open db: %v", err)
 	}
 	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("ping db: %v", err)
+	}
+	if dbWasMissing {
+		if info, err := os.Stat(absDBPath); err == nil {
+			log.Printf("warning: database file was created during startup: %q (%d bytes)", absDBPath, info.Size())
+		}
+	}
 
 	server := &server{db: db}
 	mux := http.NewServeMux()
@@ -69,6 +102,25 @@ func main() {
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
+}
+
+func enforcePersistentDBPath(dbPath string) error {
+	if !isProductionRuntime() {
+		return nil
+	}
+	if dbPath == "/data" || strings.HasPrefix(dbPath, "/data/") {
+		return nil
+	}
+	return fmt.Errorf("refusing to start in production with SBRAIN_DB=%q; use /data/... and mount persistent storage", dbPath)
+}
+
+func isProductionRuntime() bool {
+	if os.Getenv("RAILWAY_ENVIRONMENT") != "" || os.Getenv("RAILWAY_PROJECT_ID") != "" {
+		return true
+	}
+	return strings.EqualFold(os.Getenv("APP_ENV"), "production") ||
+		strings.EqualFold(os.Getenv("GO_ENV"), "production") ||
+		strings.EqualFold(os.Getenv("ENV"), "production")
 }
 
 type server struct {
